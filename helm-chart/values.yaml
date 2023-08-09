@@ -84,7 +84,7 @@ createInitialUser: true
 ## Create initial templates
 ## ref: https://taigaio.github.io/taiga-doc/dist/setup-production.html
 ##
-createInitialTemplates: false
+createInitialTemplates: true
 
 back:
   ## Taiga image version
@@ -156,14 +156,14 @@ back:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ##
   livenessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 20
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 3
   readinessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 5
     periodSeconds: 10
     timeoutSeconds: 1
@@ -224,10 +224,13 @@ async:
   ## Must match to async-rabbitmq.auth.username and async-rabbitmq.auth.password
   ## I don't use async-rabbitmq values because this bug: https://github.com/helm/helm/issues/2192
   rabbitmq:
+    ulimitNofiles: null
     auth:
       username: taiga
       password: taiga
-
+    extraEnvVars:
+      - name: "RABBITMQ_ULIMIT_NOFILES"
+        value: null
   ## Define the number of pods the deployment will create
   ## Do not change unless your persistent volume allows more than one writer, ie NFS
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
@@ -278,14 +281,14 @@ async:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ##
   livenessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 20
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 3
   readinessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 5
     periodSeconds: 10
     timeoutSeconds: 1
@@ -346,9 +349,13 @@ events:
   ## Must match to events-rabbitmq.auth.username and events-rabbitmq.auth.password
   ## I don't use events-rabbitmq values because this bug: https://github.com/helm/helm/issues/2192
   rabbitmq:
+    ulimitNofiles: null
     auth:
       username: taiga
       password: taiga
+    extraEnvVars:
+      - name: "RABBITMQ_ULIMIT_NOFILES"
+        value: null
 
   ## Pod Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -401,14 +408,14 @@ events:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ##
   livenessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 20
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 3
   readinessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 5
     periodSeconds: 10
     timeoutSeconds: 1
@@ -517,14 +524,14 @@ protected:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ##
   livenessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 20
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 3
   readinessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 5
     periodSeconds: 10
     timeoutSeconds: 1
@@ -630,14 +637,14 @@ front:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ##
   livenessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 20
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 3
   readinessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 5
     periodSeconds: 10
     timeoutSeconds: 1
@@ -745,14 +752,14 @@ gateway:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
   ##
   livenessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 20
     periodSeconds: 10
     timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 10
   readinessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 5
     periodSeconds: 10
     timeoutSeconds: 1
@@ -887,18 +894,18 @@ persistence:
   ##
   # storageClass: "-"
   accessMode: ReadWriteOnce
-  size: 5Gi
+  size: 1Gi
 
 ## PostgreSQL chart configuration
 ##
 ## https://github.com/helm/charts/blob/master/stable/postgresql/values.yaml
 ##
 postgresql:
-  image:
-    tag: 13.10.0-debian-11-r2
-
   ## Whether to deploy a PostgreSQL server to satisfy the applications database requirements. To use an external database set this to false and configure the externalDatabase parameters
   enabled: true
+  primary:
+    persistence:
+      size: 1Gi
 
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#setting-the-root-password-on-first-run
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#creating-a-database-on-first-run
@@ -921,26 +928,6 @@ postgresql:
     ##
     database: "taiga"
 
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-  ##
-  persistence:
-    enabled: true
-    ## A manually manage Persistent Volume Claim
-    ## Requires postgresql.persistence.enable: true
-    ## If defined, PVC must be created manually before volume will be bound
-    # existingClaim:
-
-    ## postgresql data Persistent Volume Storage Class
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)
-    ##
-    # storageClass: "-"
-    accessMode: ReadWriteOnce
-    size: 1Gi
 
 ## async Rabbitmq chart configuration
 ##
@@ -983,6 +970,8 @@ events-rabbitmq:
     default_permissions.configure = .*
     default_permissions.read = .*
     default_permissions.write = .*
+  persistence:
+    size: 1Gi
 
 
 ## Enable debug

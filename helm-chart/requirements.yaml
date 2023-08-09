@@ -1,15 +1,15 @@
 dependencies:
 - name: rabbitmq
-  version: 11.9.3
+  version: 12.0.10
   repository: https://charts.bitnami.com/bitnami
   alias: async-rabbitmq
   condition: rabbitmq.enabled
 - name: rabbitmq
-  version: 11.9.3
+  version: 12.0.10
   repository: https://charts.bitnami.com/bitnami
   alias: events-rabbitmq
   condition: rabbitmq.enabled
 - name: postgresql
-  version: 11.6.26
+  version: 12.8.1
   repository: https://charts.bitnami.com/bitnami
   condition: postgresql.enabled
